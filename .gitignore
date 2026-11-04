@@ -1,0 +1,5 @@
+site/
+node_modules/
+.DS_Store
+PLAN.md
+NOTES.md
