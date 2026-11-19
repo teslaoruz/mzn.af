@@ -9,34 +9,48 @@
 // reader pass over it before launch, the same standing the app's own text has.
 //
 // Money is written with Western digits inside <bdi dir="ltr">, as the app does, so it never
-// reads right-to-left. Package lists mirror docs/editions.md in the app repo exactly.
+// reads right-to-left. Package lists mirror PackageCatalog.Default() and docs/editions.md in the app repo, plus the
+// client PCs the owner set on 2026-11-17 (Intermediate 1, Advanced 3), which the app's packages still lack.
 
 const fa = {
   lang: 'fa', dir: 'rtl', locale: 'fa_AF', path: '/', langName: 'دری',
   title: 'میزان — حساب‌وکتاب تجارت، دقیق و بی‌غلط',
   description: 'نرم‌افزار حساب‌وکتاب تجارت برای بازار افغانستان: بیل چاپی، موجودی اجناس، طلب و ذمت، افغانی و دالر جدا، تقویم هجری شمسی، دری و پشتو، بدون انترنت. نمایش رایگان در محل تجارت شما.',
   skip: 'رفتن به محتوا',
-  nav: { areas: 'امکانات', bill: 'بیل', phone: 'تلیفون', packages: 'بسته‌ها', faq: 'پرسش‌ها', contact: 'تماس' },
+  nav: { areas: 'امکانات', bill: 'بیل', phone: 'تلیفون و کمپیوتر', packages: 'بسته‌ها', faq: 'پرسش‌ها', contact: 'تماس' },
   navCta: 'نمایش رایگان از میزان', menu: 'فهرست', close: 'بستن',
   hero: {
-    kicker: 'نرم‌افزار حساب‌وکتاب تجارت',
+    what: 'نرم‌افزار حساب‌وکتاب تجارت',
     h1: 'حساب‌وکتاب تجارت شما؛ دقیق و بی‌غلط',
     lede: 'خرید و فروش را مثل همیشه ثبت کنید. جمع‌وتفریق، طلب و ذمت و موجودی اجناس را میزان خودش نگه می‌دارد.',
     cta: 'نمایش رایگان در واتس‌اپ', call: 'زنگ بزنید',
     chips: ['بدون انترنت', 'تقویم هجری شمسی', 'دری و پشتو', 'افغانی و دالر، جدا'],
-    sold: 'فروش', cash: 'نقد', credit: 'نسیه', balanced: 'برابر',
-    caption: 'هر بیل خودش برابر می‌شود: آنچه فروخته‌اید، برابر است با پولی که گرفته‌اید و طلبی که دارید.',
   },
   shot: 'تصاویر از خود میزان، روی دفتر یک تجارت نمونه.',
   windowTitle: 'میزان — حساب‌داری و موجودی',
   ccy: {
     head: 'ارزها با هم جمع نمی‌شوند',
     body: 'دالر، دالر می‌ماند و افغانی، افغانی. بیلانس هر ارز جداگانه نشان داده می‌شود، بدون تبدیل خودکار یا نادرست.',
-    note: 'حد اعتبار هر مشتری هم برای هر ارز جدا تعیین می‌شود.',
+  },
+  // 2026-11-17: the lines from here to `clients` are new to the site and need a native read.
+  notes: { afn: 'افغانی', usd: 'دالر', owed: 'طلب ما از مشتری', sold: 'فروش', got: 'دریافت' },
+  pan: 'تصویر بزرگ را باز کنید',
+  counters: { title: 'پیشخوان‌های بیشتر، همان یک دفتر' },
+  // Client PCs and the new user types are release 1.5.0. The panel is a drawing until there are screenshots.
+  clients: {
+    title: 'کمپیوترهای دیگر، بدون نصب',
+    body: 'کمپیوترهای دیگرِ تجارت شما میزان را در مرورگر باز می‌کنند. کمپیوتر اصلی از راه شبکهٔ خودتان به آن‌ها خدمت می‌دهد؛ بدون انترنت و بدون نصب هیچ برنامه‌ای.',
+    points: [
+      ['با یک کد وصل می‌شود', 'مالک کد را در کمپیوتر اصلی نشان می‌دهد و کمپیوتر نو یک بار آن را می‌نویسد. هر وقت بخواهید حذفش می‌کنید.'],
+      ['یک دفتر برای همه', 'بیل هر پیشخوان در همان یک دفتر، در کمپیوتر اصلی، ثبت می‌شود.'],
+    ],
+    rolesTitle: 'هر کس صفحهٔ خودش',
+    roles: [['فروشنده', 'فروش نو'], ['صندوق‌دار', 'دریافت پول'], ['حساب‌دار', 'نمای پول'], ['گدام‌دار', 'موجودی'], ['مدیر', 'خانه']],
+    caption: 'صفحهٔ واقعی میزان در مرورگرِ یک کمپیوتر دیگر.',
   },
   areas: {
     title: 'هر بخش تجارت، رنگ خودش',
-    sub: 'هر بخش میزان رنگ خود را دارد، تا پیش از خواندن متن، جای آن را بشناسید.',
+    sub: 'فروش، اسناد، موجودی، مالیه و گزارش‌ها هر کدام رنگ خود را دارند، تا پیش از خواندن، جای خود را پیدا کنید. هر بخش را بزنید و صفحهٔ واقعی آن را ببینید.',
     items: [
       { key: 'home', name: 'خانه', line: 'روز را با یک نگاه شروع کنید.',
         points: ['فروش امروز، پول نقد، بدهکار و طلبکار', 'نمودار فروش و خرید ۳۰ روز اخیر', 'جنس‌هایی که رو به تمام شدن‌اند'] },
@@ -56,13 +70,12 @@ const fa = {
   bill: {
     title: 'بیل تجارت شما، چاپ‌شده',
     body: 'بیلی که میزان چاپ می‌کند، نام و نشانی تجارت شما، جنس‌ها با کد و واحد، جمع بیل، و حساب مشتری پیش و پس از همین بیل را نشان می‌دهد.',
-    points: ['A4 و A5 برای دفتر، ۸۰ ملی‌متر برای پیشخوان', 'سربرگ و پابرگ با تصویر دلخواه شما', 'بیل طولانی با شمارهٔ صفحه ادامه می‌یابد', 'بیلانس قبلی و بعدی مشتری روی همان بیل'],
+    points: ['A4 و A5 برای دفتر، ۸۰ ملی‌متر برای پیشخوان', 'سربرگ و پابرگ با تصویر دلخواه شما', 'بیل طولانی با شمارهٔ صفحه ادامه می‌یابد', 'بیلانس قبلی و بعدی مشتری روی همان بیل', 'QR روی هر بیل؛ با یک اسکن همان بیل باز می‌شود'],
     caption: 'بیل واقعی میزان از دفتر یک تجارت نمونه. شمارهٔ تلفن مشتری پنهان شده است.',
   },
   phone: {
     title: 'تلیفون، دستیار پیشخوان',
-    total: 'جمع بیل',
-    body: 'اپ اندروید میزان با کمپیوتر تجارت جفت می‌شود، از راه وای‌فای محل تجارت و بدون انترنت.',
+    body: 'هر تلیفون، اندروید یا آیفون، میزان را در مرورگر خود باز می‌کند، از راه وای‌فای محل تجارت و بدون انترنت. نصب برنامه لازم نیست.',
     points: [
       ['بارکد بخوانید', 'قیمت و موجودی هر جنس را فوراً ببینید.'],
       ['ثبت بیل از کنار قفسه', 'فروش و خرید را از همان تلیفون ثبت کنید.'],
@@ -85,14 +98,14 @@ const fa = {
   },
   pk: {
     title: 'سه بسته، به اندازهٔ تجارت شما',
-    sub: 'یک بار خرید؛ بدون فیس ماهانه. هر وقت خواستید، بخش دیگری را اضافه کنید.',
+    sub: 'لایسنس برای شش ماه یا یک سال. هر وقت خواستید، بخش دیگری را اضافه کنید.',
     ask: 'قیمت را بپرسید',
     tiers: [
-      { key: 'base', name: 'پایه', lines: ['خرید و فروش', 'موجودی و گدام', 'بیل و چاپ', 'اشخاص و طلب و ذمت'] },
-      { key: 'intermediate', name: 'متوسط', lines: ['هر چه در پایه است', 'پیش‌فاکتور و مرجوعی', 'پول و خزانه', 'گزارش‌ها و داشبورد', 'یک دستگاه تلیفون'] },
-      { key: 'advanced', name: 'پیشرفته', lines: ['هر چه در متوسط است', 'تمام امکانات', 'سه دستگاه تلیفون'] },
+      { key: 'base', name: 'پایه', lines: ['خرید و فروش', 'موجودی و گدام', 'بیل و چاپ', 'اشخاص و طلب و ذمت', 'پشتیبان‌گیری'] },
+      { key: 'intermediate', name: 'متوسط', lines: ['هر چه در پایه است', 'پیش‌فاکتور و مرجوعی', 'پول و خزانه', 'گزارش‌ها و داشبورد', 'کاربران با نقش خودشان: مدیر، حساب‌دار، صندوق‌دار، فروشنده، گدام‌دار', 'یک دستگاه تلیفون', 'یک کمپیوتر دیگر، در مرورگر'] },
+      { key: 'advanced', name: 'پیشرفته', lines: ['هر چه در متوسط است', 'همهٔ امکانات تلیفون: فروش، خرید، مصارف و بستن روز', 'سه دستگاه تلیفون', 'سه کمپیوتر دیگر، در مرورگر'] },
     ],
-    phones: 'تلیفون‌های بیشتر جداگانه اضافه می‌شوند.',
+    phones: 'تلیفون‌ها و کمپیوترهای بیشتر جداگانه اضافه می‌شوند.',
   },
   steps: {
     title: 'شروع، در سه قدم',
@@ -106,13 +119,14 @@ const fa = {
     title: 'پرسش‌هایی که تاجران می‌پرسند',
     items: [
       ['آیا انترنت لازم است؟', 'نه. میزان بدون انترنت کار می‌کند و تلیفون از راه وای‌فای محل تجارت به کمپیوتر وصل می‌شود. انترنت فقط برای دریافت نسخه‌های جدید، نرخ روز ارز و، در صورت تمایل، ارسال پشتیبان از طریق ایمیل استفاده می‌شود.'],
-      ['روی چه کمپیوتری کار می‌کند؟', 'روی کمپیوتر یا لپ‌تاپ ویندوز. اپ تلیفون برای اندروید است.'],
+      ['روی چه کمپیوتری کار می‌کند؟', 'کمپیوتر اصلی، کمپیوتر یا لپ‌تاپ ویندوز است. کمپیوترهای دیگر و تلیفون‌ها، اندروید یا آیفون، میزان را در مرورگر خود باز می‌کنند.'],
+      ['چند کمپیوتر می‌توانند با هم کار کنند؟', 'یک کمپیوتر اصلی، کمپیوترهای دیگرِ تجارت شما و تلیفون‌ها. کمپیوترهای دیگر و تلیفون‌ها میزان را در مرورگر باز می‌کنند، بدون نصب و بدون انترنت.'],
       ['کارگرم حساب‌داری نمی‌داند. می‌تواند کار کند؟', 'بله. کارگر تنها بیل می‌نویسد. جمع‌وتفریق، طلب و ذمت و موجودی را میزان خودش نگه می‌دارد.'],
       ['با دالر و افغانی هر دو کار می‌کند؟', 'بله. هر بیل به ارز خودش ثبت می‌شود و بیلانس هر شخص به هر ارز جدا نشان داده می‌شود.'],
       ['آیا کس دیگری معلومات مرا می‌بیند؟', 'نه. دفتر شما رمزگذاری‌شده در کمپیوتر خودتان می‌ماند، نه در کلاود. تنها چیزی که بیرون می‌رود پشتیبانی است که روی فلش می‌گیرید یا، اگر بخواهید، به نماینده ایمیل می‌شود؛ جز نمایندهٔ میزان، هیچ‌کس نمی‌تواند آن را باز کند.'],
       ['اگر کمپیوتر خراب شود، چه می‌شود؟', 'از پشتیبان هفتگی، اطلاعات شما روی کمپیوتر جدید برمی‌گردد. این کار را نمایندهٔ میزان انجام می‌دهد.'],
       ['نسخه‌های جدید چطور می‌رسند؟', 'میزان خودش نسخهٔ جدید را خبر می‌دهد و نصب می‌کند. دفتر شما دست نمی‌خورد.'],
-      ['قیمت چقدر است؟', 'به بسته‌ای که انتخاب می‌کنید و تعداد تلیفون‌ها بستگی دارد. پیام بدهید تا قیمت دقیق را بگوییم.'],
+      ['قیمت چقدر است؟', 'به بسته‌ای که انتخاب می‌کنید و تعداد تلیفون‌ها و کمپیوترها بستگی دارد. پیام بدهید تا قیمت دقیق را بگوییم.'],
     ],
   },
   contact: {
@@ -132,6 +146,8 @@ const fa = {
     reports: 'خلاصهٔ فروش در گزارش‌های میزان',
     bill: 'بیل فروش چاپی میزان با نام تجارت، جنس‌ها، جمع و بیلانس مشتری',
     light: 'مالیه در حالت روشن', dark: 'مالیه در حالت تاریک',
+    webpc: 'خانهٔ میزان در مرورگر کمپیوتر دیگر: فروش امروز، این هفته، این ماه و آخرین بل‌ها',
+    webphone: 'خانهٔ میزان در مرورگر تلیفون: فروش امروز، این هفته و این ماه',
   },
 };
 
@@ -140,27 +156,38 @@ const ps = {
   title: 'میزان — د تجارت حساب‌کتاب، دقیق او له تېروتنې پاک',
   description: 'د افغانستان بازار لپاره د تجارت د حساب‌کتاب پروګرام: چاپي بیل، د توکو موجودي، طلبونه او پورونه، افغانۍ او ډالر بېل، لمریز هجري کلیز، دري او پښتو، له انټرنېټ پرته. ستاسو د تجارت په ځای کې وړیا ښودنه.',
   skip: 'منځپانګې ته تګ',
-  nav: { areas: 'امکانات', bill: 'بیل', phone: 'تلیفون', packages: 'کڅوړې', faq: 'پوښتنې', contact: 'اړیکه' },
+  nav: { areas: 'امکانات', bill: 'بیل', phone: 'تلیفون او کمپیوټر', packages: 'کڅوړې', faq: 'پوښتنې', contact: 'اړیکه' },
   navCta: 'وړیا ښودنه', menu: 'لړلیک', close: 'بندول',
   hero: {
-    kicker: 'د تجارت د حساب‌کتاب پروګرام',
+    what: 'د تجارت د حساب‌کتاب پروګرام',
     h1: 'ستاسو د تجارت حساب‌کتاب، دقیق او له تېروتنې پاک',
     lede: 'پېر او پلور لکه تل ثبت کړئ. جمع او تفریق، طلبونه او پورونه او د توکو موجودي میزان پخپله ساتي.',
     cta: 'په واټس‌اپ کې وړیا ښودنه', call: 'زنګ ووهئ',
     chips: ['له انټرنېټ پرته', 'لمریز هجري کلیز', 'دري او پښتو', 'افغانۍ او ډالر، بېل'],
-    sold: 'پلور', cash: 'نغد', credit: 'پور', balanced: 'برابر',
-    caption: 'هر بیل پخپله توازن مومي: څه چې مو وپلورل، له ترلاسه شوو پیسو او له خپلې طلبۍ سره برابر دي.',
   },
   shot: 'دا د میزان اصلي انځورونه دي، چې د یوه بېلګېز تجارت له حسابونو اخیستل شوي.',
   windowTitle: 'میزان — محاسبه او موجودي',
   ccy: {
     head: 'اسعار له یو بل سره نه جمع کېږي',
     body: 'ډالر ډالر پاتې کېږي او افغانۍ افغانۍ. هر بیلانس په خپله کرنسۍ کې ښودل کېږي.',
-    note: 'د هر پېرودونکي د پور حد هم د هرې کرنسۍ لپاره بېل ټاکل کېږي.',
+  },
+  notes: { afn: 'افغانۍ', usd: 'ډالر', owed: 'پر پېرودونکي زموږ طلب', sold: 'پلور', got: 'ترلاسه' },
+  pan: 'لوی انځور پرانیزئ',
+  counters: { title: 'نور پیشخوانونه، هماغه یو حساب' },
+  clients: {
+    title: 'نور کمپیوټرونه، له نصب پرته',
+    body: 'ستاسو د تجارت نور کمپیوټرونه میزان په براوزر کې پرانیزي. اصلي کمپیوټر یې ستاسو د خپلې شبکې له لارې ورته وړاندې کوي؛ له انټرنېټ پرته او د هېڅ پروګرام له نصب پرته.',
+    points: [
+      ['په یوه کوډ نښلي', 'مالک په اصلي کمپیوټر کې کوډ ښيي او نوی کمپیوټر یې یو ځل لیکي. هر وخت یې لرې کولی شئ.'],
+      ['یو حساب د ټولو لپاره', 'د هر پیشخوان بیلونه په هماغه یوه حساب کې، په اصلي کمپیوټر کې ثبتېږي.'],
+    ],
+    rolesTitle: 'هر څوک خپله پاڼه',
+    roles: [['پلورونکی', 'نوی پلور'], ['صندوقدار', 'د پیسو ترلاسه کول'], ['محاسب', 'د پیسو کتنه'], ['ګودامدار', 'موجودي'], ['مدیر', 'کور']],
+    caption: 'د بل کمپیوټر په براوزر کې د میزان اصلي پاڼه.',
   },
   areas: {
     title: 'د تجارت هره برخه، خپل رنګ',
-    sub: 'د میزان هره برخه خپل رنګ لري، څو له لوستلو مخکې یې ځای وپېژنئ.',
+    sub: 'پلور، سندونه، موجودي، مالي او راپورونه هر یو خپل رنګ لري، څو له لوستلو مخکې خپل ځای ومومئ. هره برخه کېکاږئ او اصلي پاڼه یې وګورئ.',
     items: [
       { key: 'home', name: 'کور', line: 'ورځ په یوه کتنه پیل کړئ.',
         points: ['د نن ورځې پلور، نغدې پیسې، له نورو څخه زموږ طلبونه او پر موږ پورونه', 'د وروستیو ۳۰ ورځو د پلور او پېرود ګراف', 'هغه توکي چې د ختمېدو په حال کې دي'] },
@@ -180,13 +207,12 @@ const ps = {
   bill: {
     title: 'ستاسو د تجارت بیل، چاپ شوی',
     body: 'هغه بیل چې میزان یې چاپوي ستاسو د تجارت نوم او پته، توکي له کوډ او واحد سره، د بیل ټولګه، او د دې بیل دمخه او وروسته د پېرودونکي حساب ښيي.',
-    points: ['A4 او A5 د دفتر لپاره، ۸۰ ملي‌متره د پیشخوان لپاره', 'ستاسو په خپل انځور سره سرپاڼه او لمن‌پاڼه', 'اوږد بیل د پاڼې په شمېره دوام کوي', 'د پېرودونکي مخکنی او وروسته بیلانس په همدې بیل'],
+    points: ['A4 او A5 د دفتر لپاره، ۸۰ ملي‌متره د پیشخوان لپاره', 'ستاسو په خپل انځور سره سرپاڼه او لمن‌پاڼه', 'اوږد بیل د پاڼې په شمېره دوام کوي', 'د پېرودونکي مخکنی او وروسته بیلانس په همدې بیل', 'پر هر بیل QR؛ په یوه سکن هماغه بیل پرانیستل کېږي'],
     caption: 'د یوه بېلګېز تجارت له حسابونو څخه د میزان اصلي بیل. د پېرودونکي د تلیفون شمېره پټه شوې ده.',
   },
   phone: {
     title: 'تلیفون، د پیشخوان مرستیال',
-    total: 'ټولګه',
-    body: 'د میزان اندروید اپ د تجارت له کمپیوټر سره جوړه کېږي، د تجارت د وای‌فای له لارې او له انټرنېټ پرته.',
+    body: 'هر تلیفون، اندروید یا آیفون، میزان په خپل براوزر کې پرانیزي، د تجارت د وای‌فای له لارې او له انټرنېټ پرته. د پروګرام نصب ته اړتیا نشته.',
     points: [
       ['بارکوډ ولولئ', 'د هر توکي بیه او موجودي سمدستي وګورئ.'],
       ['بیل د الماري تر څنګ', 'پلور او پېرود له همدې تلیفون څخه ثبت کړئ.'],
@@ -209,14 +235,14 @@ const ps = {
   },
   pk: {
     title: 'درې کڅوړې، ستاسو د تجارت د اندازې مطابق',
-    sub: 'یو ځل یې واخلئ؛ میاشتنی فیس نه لري. هر وخت چې مو وغوښتل، بله برخه ورزیاته کړئ.',
+    sub: 'لایسنس د شپږو میاشتو یا یو کال لپاره. هر وخت چې مو وغوښتل، بله برخه ورزیاته کړئ.',
     ask: 'بیه وپوښتئ',
     tiers: [
-      { key: 'base', name: 'بنسټیز', lines: ['پېر او پلور', 'موجودي او ګودامونه', 'بیل او چاپ', 'کسان او حسابونه'] },
-      { key: 'intermediate', name: 'منځنی', lines: ['هر څه چې په بنسټیز کې دي', 'نرخ‌غوښتنې او بېرته ستنول', 'پیسې او خزانه', 'راپورونه او ډشبورډ', 'یو تلیفون'] },
-      { key: 'advanced', name: 'پرمختللی', lines: ['هر څه چې په منځني کې دي', 'ټول امکانات', 'درې تلیفونه'] },
+      { key: 'base', name: 'بنسټیز', lines: ['پېر او پلور', 'موجودي او ګودامونه', 'بیل او چاپ', 'کسان او حسابونه', 'بیکاپ'] },
+      { key: 'intermediate', name: 'منځنی', lines: ['هر څه چې په بنسټیز کې دي', 'نرخ‌غوښتنې او بېرته ستنول', 'پیسې او خزانه', 'راپورونه او ډشبورډ', 'کاروونکي له خپلو رولونو سره: مدیر، محاسب، صندوقدار، پلورونکی، ګودامدار', 'یو تلیفون', 'یو بل کمپیوټر، په براوزر کې'] },
+      { key: 'advanced', name: 'پرمختللی', lines: ['هر څه چې په منځني کې دي', 'د تلیفون ټول امکانات: پلور، پېر، لګښتونه او د ورځې تړل', 'درې تلیفونه', 'درې نور کمپیوټرونه، په براوزر کې'] },
     ],
-    phones: 'نور تلیفونونه بېل ورزیاتېږي.',
+    phones: 'نور تلیفونونه او کمپیوټرونه بېل ورزیاتېږي.',
   },
   steps: {
     title: 'پیل، په دریو ګامونو',
@@ -230,13 +256,14 @@ const ps = {
     title: 'هغه پوښتنې چې تاجران یې کوي',
     items: [
       ['انټرنېټ ته اړتیا ده؟', 'نه. میزان له انټرنېټ پرته کار کوي او تلیفون د تجارت د وای‌فای له لارې کمپیوټر سره نښلي. انټرنېټ یوازې د نوې نسخې، د ورځې د اسعارو نرخ او، که وغواړئ، د بیکاپ برېښنالیک لپاره په کار دی.'],
-      ['په کوم کمپیوټر کار کوي؟', 'د وینډوز په کمپیوټر یا لپ‌ټاپ. د تلیفون اپ د اندروید لپاره دی.'],
+      ['په کوم کمپیوټر کار کوي؟', 'اصلي کمپیوټر د وینډوز کمپیوټر یا لپ‌ټاپ دی. نور کمپیوټرونه او تلیفونونه، اندروید یا آیفون، میزان په خپل براوزر کې پرانیزي.'],
+      ['څو کمپیوټرونه یو ځای کار کولی شي؟', 'یو اصلي کمپیوټر، ستاسو د تجارت نور کمپیوټرونه او تلیفونونه. نور کمپیوټرونه او تلیفونونه میزان په براوزر کې پرانیزي، له نصب او انټرنېټ پرته.'],
       ['زما کارګر محاسبه نه پېژني. کار کولی شي؟', 'هو. کارګر یوازې بیل لیکي. جمع او تفریق، طلبونه او پورونه او موجودي میزان پخپله ساتي.'],
       ['له ډالرو او افغانیو دواړو سره کار کوي؟', 'هو. هر بیل په خپله کرنسۍ ثبتېږي او د هر کس بیلانس د هرې کرنسۍ لپاره بېل ښودل کېږي.'],
       ['بل څوک زما معلومات ګوري؟', 'نه. ستاسو حسابونه په خپل کمپیوټر کې کوډ شوي پاتې کېږي، نه په کلاوډ کې. یوازې هغه بیکاپ بهر ځي چې په فلش یې اخلئ یا، که وغواړئ، استازي ته برېښنالیک کېږي؛ هغه د میزان له استازي پرته بل څوک نشي خلاصولی.'],
       ['که کمپیوټر خراب شي، څه کېږي؟', 'له اوونیز بیکاپ څخه ستاسو حسابونه په نوي کمپیوټر کې بېرته راګرځول کېږي. دا کار د میزان استازی کوي.'],
       ['نوې نسخې څنګه رسېږي؟', 'میزان پخپله د نوې نسخې خبر درکوي او نصبوي یې. ستاسو حسابونو ته لاس نه وړل کېږي.'],
-      ['بیه یې څومره ده؟', 'پر هغې کڅوړې او د تلیفونونو پر شمېر پورې اړه لري چې ټاکئ یې. پیغام راکړئ څو سمه بیه درته ووایو.'],
+      ['بیه یې څومره ده؟', 'پر هغې کڅوړې او د تلیفونونو او کمپیوټرونو پر شمېر پورې اړه لري چې ټاکئ یې. پیغام راکړئ څو سمه بیه درته ووایو.'],
     ],
   },
   contact: {
@@ -256,6 +283,8 @@ const ps = {
     reports: 'د میزان په راپورونو کې د پلور لنډیز',
     bill: 'د میزان چاپي پلور بیل: د تجارت نوم، توکي، ټولګه او د پېرودونکي بیلانس',
     light: 'مالي په روښانه حالت کې', dark: 'مالي په تیاره حالت کې',
+    webpc: 'د بل کمپیوټر په براوزر کې د میزان کور: د نن، دې اوونۍ او دې میاشتې پلور او وروستي بیلونه',
+    webphone: 'د تلیفون په براوزر کې د میزان کور: د نن، دې اوونۍ او دې میاشتې پلور',
   },
 };
 
@@ -264,27 +293,38 @@ const en = {
   title: 'Mizan — business accounting for Afghanistan’s markets',
   description: 'Offline accounting for Afghan businesses: printed bills, stock, customer balances, afghani and dollars kept separate, Jalali calendar, Dari and Pashto. Free demonstration at your own business.',
   skip: 'Skip to content',
-  nav: { areas: 'Features', bill: 'Bills', phone: 'Phone', packages: 'Packages', faq: 'Questions', contact: 'Contact' },
+  nav: { areas: 'Features', bill: 'Bills', phone: 'Phone and PCs', packages: 'Packages', faq: 'Questions', contact: 'Contact' },
   navCta: 'Free demonstration', menu: 'Menu', close: 'Close',
   hero: {
-    kicker: 'Business accounting software',
+    what: 'Business accounting software',
     h1: 'Your business accounts, accurate to the last afghani',
     lede: 'Record your sales and purchases the way you always have. Mizan keeps your totals, customer balances, and stock up to date.',
     cta: 'Free demonstration on WhatsApp', call: 'Call us',
     chips: ['No internet needed', 'Jalali calendar', 'Dari and Pashto', 'Afghani and dollars kept separate'],
-    sold: 'Sold', cash: 'Cash', credit: 'On credit', balanced: 'Balanced',
-    caption: 'Every bill balances automatically: what you sold equals what you received plus what customers still owe you.',
   },
   shot: 'Real Mizan screens, from a sample business’s accounts.',
   windowTitle: 'Mizan — Accounting & Inventory',
   ccy: {
     head: 'Currencies are never mixed',
     body: 'Dollars stay dollars, afghani stay afghani. Every balance stays in its own currency; currencies are never merged through an exchange rate.',
-    note: 'Each customer’s credit limit is set separately for each currency.',
+  },
+  notes: { afn: 'Afghani', usd: 'Dollars', owed: 'Customer owes us', sold: 'Sale', got: 'Received' },
+  pan: 'Open the full-size picture',
+  counters: { title: 'More counters, one set of books' },
+  clients: {
+    title: 'More computers, nothing to install',
+    body: 'The other computers in your business open Mizan in a browser. The main computer serves them over your own network: no internet, and no program to install.',
+    points: [
+      ['Joins with a code', 'The owner shows a code on the main computer and the new computer types it once. Remove it whenever you like.'],
+      ['One set of books', 'Every counter’s bills land in the same accounts, on the main computer.'],
+    ],
+    rolesTitle: 'Everyone on their own screen',
+    roles: [['Seller', 'New sale'], ['Cashier', 'Receive money'], ['Accountant', 'Money overview'], ['Storekeeper', 'Stock'], ['Manager', 'Home']],
+    caption: 'The real Mizan page in another computer’s browser.',
   },
   areas: {
     title: 'Every part of the business has its colour',
-    sub: 'Each area of Mizan keeps one colour everywhere, so you can recognise it before reading the label.',
+    sub: 'Selling, bills, stock, finance and reports each keep one colour everywhere, so you find your place before you read. Tap a part to see its real screen.',
     items: [
       { key: 'home', name: 'Home', line: 'Start the day at a glance.',
         points: ['Sales today, cash, owed to us, we owe', 'Sales and purchases over the last 30 days', 'What is about to run out'] },
@@ -304,13 +344,12 @@ const en = {
   bill: {
     title: 'Your bill, printed the way you need it',
     body: 'A Mizan bill carries your business’s name and address, every item with its code and unit, the total, and the customer’s account before and after this bill.',
-    points: ['A4 and A5 for the office, 80 mm for the counter', 'Your own letterhead and footer images', 'Long bills run onto numbered pages', 'The customer’s balance before and after, on the bill'],
+    points: ['A4 and A5 for the office, 80 mm for the counter', 'Your own letterhead and footer images', 'Long bills run onto numbered pages', 'The customer’s balance before and after, on the bill', 'A QR code on every bill opens that bill with one scan'],
     caption: 'A real Mizan bill from a sample business’s accounts. The customer’s phone number is hidden.',
   },
   phone: {
     title: 'Your phone works as a second counter',
-    total: 'Total',
-    body: 'Mizan’s Android app pairs with the business computer over the business’s Wi-Fi. No internet needed.',
+    body: 'Any phone, Android or iPhone, opens Mizan in its browser over the business’s Wi-Fi. No internet needed, and nothing to install.',
     points: [
       ['Scan a barcode', 'See any item’s price and stock at once.'],
       ['Create a bill from the shelf', 'Post a sale or a purchase from the phone.'],
@@ -333,14 +372,14 @@ const en = {
   },
   pk: {
     title: 'Three packages, sized to your business',
-    sub: 'Buy once; there is no monthly fee. Add another part whenever you need it.',
+    sub: 'A licence runs for six months or a year. Add another part whenever you need it.',
     ask: 'Ask for the price',
     tiers: [
-      { key: 'base', name: 'Base', lines: ['Buy and sell', 'Stock and warehouses', 'Bills and printing', 'People and balances'] },
-      { key: 'intermediate', name: 'Intermediate', lines: ['Everything in the Base package', 'Quotations and returns', 'Cash management', 'Reports and dashboard', 'One phone'] },
-      { key: 'advanced', name: 'Advanced', lines: ['Everything in the Intermediate package', 'Every feature', 'Three phones'] },
+      { key: 'base', name: 'Base', lines: ['Buy and sell', 'Stock and warehouses', 'Bills and printing', 'People and balances', 'Backups'] },
+      { key: 'intermediate', name: 'Intermediate', lines: ['Everything in the Base package', 'Quotations and returns', 'Cash management', 'Reports and dashboard', 'Users with their own roles: manager, accountant, cashier, seller, storekeeper', 'One phone', 'One more computer, through its browser'] },
+      { key: 'advanced', name: 'Advanced', lines: ['Everything in the Intermediate package', 'Every phone feature: sales, purchases, expenses and day close', 'Three phones', 'Three more computers, through their browsers'] },
     ],
-    phones: 'More phones can be added separately.',
+    phones: 'More phones and more computers can be added separately.',
   },
   steps: {
     title: 'Three steps to start',
@@ -354,13 +393,14 @@ const en = {
     title: 'What traders ask',
     items: [
       ['Do I need the internet?', 'No. Mizan works offline, and the phone talks to the computer over the business’s Wi-Fi. The internet is only used for new versions, today’s exchange rate and, if you want it, emailing the backup to your agent.'],
-      ['What computer does it run on?', 'A Windows computer or laptop. The phone app is for Android.'],
+      ['What computer does it run on?', 'The main computer is a Windows computer or laptop. Other computers and phones, Android or iPhone, open Mizan in their browser.'],
+      ['Can several computers work together?', 'One main computer, the other computers in your business, and phones. The other computers and phones open Mizan in a browser, with nothing to install and no internet.'],
       ['My worker knows no accounting. Can they use it?', 'Yes. The worker only writes bills. Mizan keeps the totals, customer balances, and the stock.'],
       ['Does it handle dollars and afghanis?', 'Yes. Every bill is kept in its own currency, and each person’s balance is shown per currency.'],
       ['Can anyone else see my data?', 'No. Your accounts stay encrypted on your own computer, not in a cloud. The only thing that leaves is the backup you put on a memory stick or, if you choose, email to your agent, and only an authorized Mizan agent can open it.'],
       ['What if the computer breaks?', 'Your accounts are restored on a new computer from the weekly backup. A Mizan agent does it for you.'],
       ['How do new versions arrive?', 'Mizan tells you when a new version is out and installs it. Your accounts are not touched.'],
-      ['How much does it cost?', 'It depends on the package and how many phones you want. Message us for an exact price.'],
+      ['How much does it cost?', 'It depends on the package and how many phones and computers you want. Message us for an exact price.'],
     ],
   },
   contact: {
@@ -380,6 +420,8 @@ const en = {
     reports: 'Sales summary in Mizan’s reports',
     bill: 'A printed Mizan sale bill with business name, items, total and the customer’s balance',
     light: 'Finance in light mode', dark: 'Finance in dark mode',
+    webpc: 'Mizan Home in another computer’s browser: sales today, this week, this month and the latest bills',
+    webphone: 'Mizan Home in a phone’s browser: sales today, this week and this month',
   },
 };
 

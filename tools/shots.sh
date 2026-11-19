@@ -28,11 +28,15 @@ for l in fa ps en; do
   # The demo customer's phone looks like a real Afghan number, so it is masked before publishing.
   sed -E 's/07[0-9]{2} [0-9]{3} [0-9]{3}/07•• ••• •••/g' "bill-$l.html" > "bill-$l.red.html"
   google-chrome-stable --headless=new --disable-gpu --no-sandbox --hide-scrollbars --force-device-scale-factor=2 \
-    --window-size=820,620 --screenshot="$W/bill-$l.png" "file://$W/walk/bill-$l.red.html" 2>/dev/null
-  magick "$W/bill-$l.png" -crop 1588x1100+26+108 +repage -quality 82 "$IMG/$l-bill.webp"
+    --window-size=820,900 --screenshot="$W/bill-$l.png" "file://$W/walk/bill-$l.red.html" 2>/dev/null
+  magick "$W/bill-$l.png" -crop 1588x1232+26+108 +repage -quality 82 "$IMG/$l-bill.webp"
 done
 f=$(ls fa-*-dark.fin.OverviewTab.png | head -1)
 magick "$f" -quality 80 "$IMG/fa-dark.webp"; magick "$f" -resize 760x -quality 78 "$IMG/fa-dark-760.webp"
 
 cd "$SITE" && node build.mjs --og
+# The web client pictures (static/img/<lang>-webpc*.webp, <lang>-webphone.webp) are the real web client on the
+# same book: MIZAN_WEB_SERVE=600 MIZAN_HTTPS_PORT=47555 MIZAN_WEB_DB="$W/demo.db" dotnet run --project tests/Desktop.Tests,
+# then SHOOT_INSECURE=1 node tools/shoot.mjs to pair with the printed code, sign in as karim, and shoot /home at
+# 1400x900 and 390x844 after /lang?l=<fa|ps|en>&to=/home. Stop it by touching the file it prints (it also listens on the LAN).
 echo "Done. Look at every picture before deploying: walk indexes move when the app adds a page."

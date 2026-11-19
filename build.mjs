@@ -29,14 +29,11 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const money = s => `<bdi class="money" dir="ltr">${esc(s)}</bdi>`;
 const digits = (n, lang) => lang === 'en' ? String(n) : String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-// Area colours from the app's DESIGN.md: solid, soft (tile/chip ground), ink (text on soft).
+// Area colours from the app's DESIGN.md (1.5.0 paints each part of Mizan in its own): solid and ink.
+// Ink carries white text at 4.5:1 or better, so a selected tab can be filled with it.
 const AREA = {
-  home:      ['#1B5E20', '#E3F0E4', '#1B5E20'],
-  sell:      ['#12A150', '#E2F5E9', '#0B6B35'],
-  bills:     ['#5B5BD6', '#ECECFB', '#3C3CA8'],
-  inventory: ['#EE8A12', '#FDF0DE', '#9A5600'],
-  finance:   ['#7C4DDB', '#EFE8FC', '#5631A8'],
-  reports:   ['#E0457B', '#FCE6EE', '#A82657'],
+  sell: ['#12A150', '#0B6B35'], bills: ['#5B5BD6', '#3C3CA8'], inventory: ['#EE8A12', '#9A5600'],
+  finance: ['#7C4DDB', '#5631A8'], reports: ['#E0457B', '#A82657'], dark: ['#1B6B4A', '#12503A'],
 };
 
 // Icons: 24px, 2px round strokes, drawn to sit beside the app's own line icons.
@@ -70,6 +67,8 @@ const P = {
   low: '<path d="M4 20V8M10 20v-6M16 20v-3M3 4l18 10"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   close: '<path d="m6 6 12 12M18 6 6 18"/>',
+  pc: '<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/>',
+  dark: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
   printer: '<path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/>',
 };
 const icon = (k, cls = 'i') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${P[k]}</svg>`;
@@ -90,69 +89,61 @@ function links(t) {
   };
 }
 
-// What the scale weighs: a sale part-paid at the counter, the rest on credit (the sale form's
-// "paid now" box), once in afghani and once in dollars. Illustrative figures, not the demo book's:
-// its sales are all-cash or all-credit, and the bill picture further down shows its own S717.
-const WEIGH = [
-  { sold: '48,600 ؋', cash: '30,000 ؋', credit: '18,600 ؋' },
-  { sold: '1,250 $', cash: '1,000 $', credit: '250 $' },
-];
+// The hero's two notes: what one customer owes, kept per currency. A sale or a payment moves one
+// note only; the other never changes. Illustrative figures. Each cycle returns to the start, and
+// every value keeps its digit count, so the digits roll in fixed places.
+const NOTES = { afn: [18600, ' ؋', 'A'], usd: [250, ' $', 'B'] };
+const POSTS = [['afn', 2400, 'sold'], ['usd', -100, 'got'], ['afn', -5000, 'got'], ['usd', 350, 'sold'], ['afn', 2600, 'sold'], ['usd', -250, 'got']];
 
-// The phone's bill: three lines from the demo shop's longest sale (the same items as the printed bill).
-const PHONE_ITEMS = [
-  ['پریز دیواری دوخانه', 'FIT-SKT2', '145.00'],
-  ['فیوز مینیاتوری 32 امپر', 'SWG-MCB3', '340.00'],
-  ['لامپ LED 12 وات', 'LMP-1209', '180.00'],
-];
-const PHONE_TOTAL = PHONE_ITEMS.reduce((n, [, , p]) => n + Number(p), 0).toFixed(2);
-
-// Package weights: brass weights drawn in the hero scale's line style, one more per package.
-const WEIGHT = [[16, 16], [20, 21], [24, 26]].map(([w, h]) => {
-  const x = (28 - w) / 2, y = 38 - h;
-  return `<svg class="wt" viewBox="0 0 28 40" width="28" height="40"><circle cx="14" cy="${y - 4.5}" r="3.5"/><path d="M${x + 3} ${y}h${w - 6}l3 ${h - 1}H${x}z"/></svg>`;
-});
+// Guilloche: one closed wave drawn once (#gl), then stamped in rotated copies, the way a
+// banknote rosette is engraved. One path keeps every page about 3 KB lighter than drawing each ring.
+const GL = 'M' + Array.from({ length: 240 }, (_, i) => {
+  const th = 2 * Math.PI * i / 240, r = 150 + 38 * Math.cos(8 * th) + 10 * Math.cos(24 * th);
+  return `${(r * Math.cos(th)).toFixed(1)} ${(r * Math.sin(th)).toFixed(1)}`;
+}).join('L') + 'Z';
+const uses = (n, step, scale = '') => Array.from({ length: n }, (_, i) => `<use href="#gl" style="--i:${i}" transform="${scale}rotate(${(i * step).toFixed(2)})"/>`).join('');
+const rosette = cls => `<svg class="ros ${cls}" viewBox="-200 -200 400 400" aria-hidden="true" focusable="false">${uses(12, 3.75)}${uses(8, 5.6, 'scale(.58) ')}</svg>`;
+const seal = `<svg class="seal" viewBox="-200 -200 400 400" aria-hidden="true" focusable="false">${uses(3, 15)}${uses(2, 22.5, 'scale(.58) ')}</svg>`;
 
 // ------------------------------------------------------------------ the page
 function page(lang) {
-  const t = copy[lang], L = links(t), rtl = t.dir === 'rtl';
-  const url = site + t.path;
-  const img = (k, alt, cls = '', eager = false) =>
-    `<img class="${cls}" src="/img/${lang}-${k}.webp" srcset="/img/${lang}-${k}-760.webp 760w, /img/${lang}-${k}.webp 1400w" sizes="(min-width: 1100px) 760px, 92vw" width="1400" height="900" alt="${esc(alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
-  const waBtn = (msg, label, cls = 'btn btn-wa') => `<a class="${cls}${L.ph.wa ? ' is-ph' : ''}" href="${L.wa(msg)}"${L.ph.wa ? '' : ' target="_blank" rel="noopener"'}>${icon('wa')}<span>${esc(label)}</span></a>`;
+  const t = copy[lang], L = links(t);
+  const url = site + t.path, name = lang === 'en' ? 'Mizan' : 'میزان';
+  const img = (k, alt, eager = false) =>
+    `<img src="/img/${lang}-${k}.webp" srcset="/img/${lang}-${k}-760.webp 760w, /img/${lang}-${k}.webp 1400w" sizes="(min-width: 1000px) 760px, (min-width: 760px) 92vw, 680px" width="1400" height="900" alt="${esc(alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+  const waBtn = (msg, label, cls = 'btn btn-go') => `<a class="${cls}" href="${L.wa(msg)}"${L.ph.wa ? '' : ' target="_blank" rel="noopener"'}>${icon('wa')}<span>${esc(label)}</span></a>`;
   const ticks = arr => `<ul class="ticks">${arr.map(x => `<li>${icon('check')}<span>${esc(x)}</span></li>`).join('')}</ul>`;
+  const winBar = `<div class="win-bar" aria-hidden="true"><img src="/img/logo.svg" width="16" height="16" alt=""><span>${esc(t.windowTitle)}</span><i class="win-ctl"><b></b><b></b><b></b></i></div>`;
   const alternates = langs.map(l => `<link rel="alternate" hreflang="${l === 'fa' ? 'fa-AF' : l === 'ps' ? 'ps-AF' : 'en'}" href="${site}${copy[l].path}">`).join('\n  ')
     + `\n  <link rel="alternate" hreflang="x-default" href="${site}/">`;
   const langSwitch = cls => `<div class="${cls}" role="group" aria-label="Language / زبان / ژبه">${langs.map(l =>
     `<a href="${copy[l].path}" hreflang="${l}" lang="${l}"${l === lang ? ' aria-current="page"' : ''}>${copy[l].langName}</a>`).join('')}</div>`;
   const ld = {
-    '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: lang === 'en' ? 'Mizan' : 'میزان',
-    alternateName: ['Mizan', 'میزان'], url, inLanguage: ['fa-AF', 'ps-AF', 'en'], operatingSystem: 'Windows, Android',
+    '@context': 'https://schema.org', '@type': 'SoftwareApplication', name,
+    alternateName: ['Mizan', 'میزان'], url, inLanguage: ['fa-AF', 'ps-AF', 'en'], operatingSystem: 'Windows; web browser (Android, iOS)',
     applicationCategory: 'BusinessApplication', applicationSubCategory: 'Accounting', description: t.description,
     image: `${site}/img/og-${lang}.png`,
   };
   const socials = Object.entries(config.social).map(([k, v]) => {
     if (!v) missing.add(`social.${k}`);
-    const name = { tiktok: 'TikTok', youtube: 'YouTube' }[k] || k[0].toUpperCase() + k.slice(1);
-    return v ? `<li><a href="${esc(v)}" target="_blank" rel="noopener" aria-label="${name}">${icon(k)}</a></li>`
-             : `<li><span class="soc-ph" title="${name} — ${esc(t.contact.soon)}">${icon(k)}<span class="sr">${name} — ${esc(t.contact.soon)}</span></span></li>`;
+    const n = { tiktok: 'TikTok', youtube: 'YouTube' }[k] || k[0].toUpperCase() + k.slice(1);
+    return v ? `<li><a href="${esc(v)}" target="_blank" rel="noopener" aria-label="${n}">${icon(k)}</a></li>` : '';
   }).join('');
+  const note = k => { const [v, sym, serial] = NOTES[k]; return `
+        <div class="note note-${k}" data-note="${k}" data-v="${v}">
+          ${seal}
+          <p class="note-name">${esc(t.notes[k])}</p>
+          <p class="note-lbl">${esc(t.notes.owed)}</p>
+          <p class="note-fig"><bdi class="money" dir="ltr" data-fig>${v.toLocaleString('en-US')}${sym}</bdi></p>
+          <p class="note-post" data-post aria-hidden="true"><span></span> <bdi class="money" dir="ltr"></bdi></p>
+          <span class="note-serial" dir="ltr" aria-hidden="true">MZN 1405 ${serial}</span>
+        </div>`; };
+  const [home, ...areas] = t.areas.items;
+  const tab = (k, label, i) => `<button type="button" role="tab" id="tab-${k}" aria-controls="p-${k}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" style="--a:${AREA[k][0]};--ai:${AREA[k][1]}">${icon(k)}<span>${esc(label)}</span></button>`;
 
   return `<!doctype html>
 <html lang="${t.lang}" dir="${t.dir}">
 <head>
-<!--
-  THESIS: Mizan means "scales". The page opens on a working balance that weighs a real sale against
-  cash plus credit and comes level, the one idea a shopkeeper must believe: the books always
-  balance. Refuses the generic SaaS hero of floating gradient blobs and a stock laptop.
-  OWN-WORLD: the app's own office: deep ledger green fields (#0B3A2C), cool light ground, white
-  cards with 14px radius and a hairline, six area colours on solid icon tiles and soft chips,
-  Vazirmatn, tabular Western-digit money in LTR isolates even in RTL.
-  STORY: see it balance, see the real screens area by area, see the printed bill, trust that
-  mistakes are caught and the data stays home, pick a package, message for a free demo.
-  FIRST VIEWPORT: green field; leading side kicker, h1, lede, WhatsApp demo + call, four chips;
-  trailing side the animated scale with the demo shop's figures; the app window rises below.
-  FORM: candidate 5 of 7 ("the scales"), staged on the app's own sidebar grammar; seed 527917a4.
--->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(t.title)}</title>
@@ -161,7 +152,7 @@ function page(lang) {
   ${alternates}
 <meta name="theme-color" content="#0B3A2C">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="${lang === 'en' ? 'Mizan' : 'میزان'}">
+<meta property="og:site_name" content="${name}">
 <meta property="og:title" content="${esc(t.title)}">
 <meta property="og:description" content="${esc(t.description)}">
 <meta property="og:url" content="${url}">
@@ -179,16 +170,17 @@ ${langs.filter(l => l !== lang).map(l => `<meta property="og:locale:alternate" c
 <link rel="preload" href="/fonts/vazirmatn-regular.woff2" as="font" type="font/woff2" crossorigin>
 <style>${css}</style>
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
-
 </head>
 <body class="lang-${lang}">
 <a class="skip" href="#main">${esc(t.skip)}</a>
+<svg width="0" height="0" class="defs" aria-hidden="true" focusable="false"><defs><path id="gl" pathLength="1" d="${GL}"/></defs></svg>
 
 <header class="top" data-top>
   <div class="wrap top-row">
-    <a class="brand" href="${t.path}" aria-label="${lang === 'en' ? 'Mizan' : 'میزان'}">
-      <img src="/img/logo.svg" width="38" height="38" alt=""><span>${lang === 'en' ? 'Mizan' : 'میزان'}</span>
+    <a class="brand" href="${t.path}" aria-label="${name}">
+      <img src="/img/logo.svg" width="38" height="38" alt=""><span>${name}</span>
     </a>
+    <p class="guide" data-guide data-default="${esc(t.hero.what)}" aria-hidden="true">${esc(t.hero.what)}</p>
     <nav class="nav" id="nav" aria-label="${esc(t.menu)}">
       <ul>
         <li><a href="#areas">${esc(t.nav.areas)}</a></li>
@@ -202,7 +194,7 @@ ${langs.filter(l => l !== lang).map(l => `<meta property="og:locale:alternate" c
     </nav>
     <div class="top-end">
       ${langSwitch('langs')}
-      ${waBtn(t.contact.waMsg, t.navCta, 'btn btn-wa btn-sm')}
+      ${waBtn(t.contact.waMsg, t.navCta, 'btn btn-go btn-sm')}
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" data-menu>
         ${icon('menu', 'i i-open')}${icon('close', 'i i-close')}<span class="sr">${esc(t.menu)}</span>
       </button>
@@ -212,159 +204,137 @@ ${langs.filter(l => l !== lang).map(l => `<meta property="og:locale:alternate" c
 
 <main id="main">
 <section class="hero" data-hero>
+  ${rosette('ros-hero')}
   <div class="wrap hero-grid">
+    <h1>${esc(t.hero.h1)}</h1>
     <div class="hero-copy">
-      <p class="kicker">${esc(t.hero.kicker)}</p>
-      <h1>${esc(t.hero.h1)}</h1>
       <p class="lede">${esc(t.hero.lede)}</p>
       <div class="cta-row">
-        ${waBtn(t.contact.waMsg, t.hero.cta, 'btn btn-cream btn-lg')}
-        <a class="btn btn-ghost btn-lg${L.ph.tel ? ' is-ph' : ''}" href="${L.tel}">${icon('call')}<span>${esc(t.hero.call)}</span></a>
+        ${waBtn(t.contact.waMsg, t.hero.cta, 'btn btn-go btn-lg')}
+        <a class="btn btn-line btn-lg" href="${L.tel}">${icon('call')}<span>${esc(t.hero.call)}</span></a>
       </div>
-      <ul class="chips">
+      <ul class="serial">
         ${[['offline', 0], ['calendar', 1], ['lang', 2], ['coins', 3]].map(([k, i]) => `<li>${icon(k)}<span>${esc(t.hero.chips[i])}</span></li>`).join('')}
       </ul>
     </div>
-
-    <figure class="scale" data-scale data-weigh='${JSON.stringify(WEIGH)}'>
-      <div class="scale-stage">
-        <svg class="scale-svg" viewBox="0 0 560 470" aria-hidden="true">
-          <path class="stand" d="M280 128V404"/>
-          <path class="base" d="M206 432h148l-26-28h-96z"/>
-          <path class="index" d="M272 40h16l-8 11z"/>
-          <g class="beam" data-beam><path class="needle" d="M280 104V62"/><path d="M80 120H480"/><circle cx="80" cy="120" r="7"/><circle cx="480" cy="120" r="7"/></g>
-          <circle class="knob" cx="280" cy="120" r="15"/>
-          <g class="pan" data-pan-svg="l"><path class="str" d="M80 120 22 300M80 120l58 180"/><path class="bowl" d="M8 300h144a72 30 0 0 1-144 0z"/></g>
-          <g class="pan" data-pan-svg="r"><path class="str" d="M480 120l-58 180M480 120l58 180"/><path class="bowl" d="M408 300h144a72 30 0 0 1-144 0z"/></g>
-        </svg>
-        <div class="load" data-load="l"></div>
-        <div class="load" data-load="r"></div>
-        <p class="stamp" data-stamp>${icon('check')}<span>${esc(t.hero.balanced)}</span></p>
-        <template data-tags>
-          <span class="tag tag-sold"><i>${esc(t.hero.sold)}</i><b data-v="sold"></b></span>
-          <span class="tag tag-cash"><i>${esc(t.hero.cash)}</i><b data-v="cash"></b></span>
-          <span class="tag tag-credit"><i>${esc(t.hero.credit)}</i><b data-v="credit"></b></span>
-        </template>
-        <noscript><p class="scale-static" dir="ltr">${money(WEIGH[0].sold)} = ${money(WEIGH[0].cash)} + ${money(WEIGH[0].credit)}</p></noscript>
-      </div>
-      <figcaption>${esc(t.hero.caption)}</figcaption>
-    </figure>
+    <div class="notes" data-notes data-posts='${JSON.stringify(POSTS)}' data-lbl='${esc(JSON.stringify({ sold: t.notes.sold, got: t.notes.got }))}'>
+      ${note('afn')}${note('usd')}
+      <p class="notes-cap"><b>${esc(t.ccy.head)}</b> ${esc(t.ccy.body)}</p>
+    </div>
   </div>
 </section>
 
 <section class="showcase" aria-label="${esc(t.alt.home)}">
   <div class="wrap">
     <figure class="win win-hero">
-      <div class="win-bar" aria-hidden="true"><img src="/img/logo.svg" width="16" height="16" alt=""><span>${esc(t.windowTitle)}</span><i class="win-ctl"><b></b><b></b><b></b></i></div>
-      ${img('home', t.alt.home, '', true)}
+      ${winBar}
+      ${img('home', t.alt.home, true)}
     </figure>
-    <p class="shot-note">${esc(t.shot)}</p>
-  </div>
-</section>
-
-<section class="ccy" data-reveal>
-  <div class="wrap ccy-grid">
-    <p class="ccy-eq" dir="ltr" aria-hidden="true"><span class="coin coin-usd">200 $</span><span class="plus">+</span><span class="coin coin-afn">10,000 ؋</span></p>
-    <div class="ccy-copy">
-      <h2>${esc(t.ccy.head)}</h2>
-      <p>${esc(t.ccy.body)}</p>
-      <p class="note">${esc(t.ccy.note)}</p>
+    <div class="show-cap">
+      <p class="show-line"><b>${esc(home.name)}</b> ${esc(home.line)}</p>
+      ${ticks(home.points)}
+      <p class="shot-note">${esc(t.shot)}</p>
     </div>
   </div>
 </section>
 
-<section class="areas" id="areas">
+<section class="areas" id="areas" data-name="${esc(t.nav.areas)}">
   <div class="wrap">
     <header class="sec-head">
       <h2>${esc(t.areas.title)}</h2>
       <p>${esc(t.areas.sub)}</p>
     </header>
-    <div class="areas-grid">
-      <ol class="area-list">
-        ${t.areas.items.map((a, i) => { const [s, so, ink] = AREA[a.key]; return `
-        <li class="area${i === 0 ? ' on' : ''}" data-area="${a.key}" style="--a:${s};--as:${so};--ai:${ink}">
-          <span class="area-tile">${icon(a.key)}</span>
-          <div class="area-body">
-            <h3>${esc(a.name)}</h3>
-            <p class="area-line">${esc(a.line)}</p>
-            ${ticks(a.points)}
-            <div class="area-shot-m win">${img(a.key, t.alt[a.key])}</div>
-          </div>
-        </li>`; }).join('')}
-      </ol>
-      <div class="area-stage">
-        <figure class="win win-stage" data-stage style="--a:${AREA.home[0]}">
-          <div class="win-bar" aria-hidden="true"><img src="/img/logo.svg" width="16" height="16" alt=""><span>${esc(t.windowTitle)}</span><i class="win-ctl"><b></b><b></b><b></b></i></div>
-          <div class="stage-imgs">
-            ${t.areas.items.map((a, i) => img(a.key, t.alt[a.key], `stage-img${i === 0 ? ' on' : ''}`).replace('<img ', `<img data-shot="${a.key}" `)).join('\n            ')}
-          </div>
-        </figure>
+    <div class="tabs" role="tablist" aria-label="${esc(t.areas.title)}">
+      ${areas.map((a, i) => tab(a.key, a.name, i)).join('')}${tab('dark', t.dark.title, -1)}
+    </div>
+    ${areas.map((a, i) => `
+    <article class="panel${i === 0 ? ' on' : ''}" id="p-${a.key}" role="tabpanel" style="--a:${AREA[a.key][0]};--ai:${AREA[a.key][1]}" aria-labelledby="tab-${a.key}">
+      <div class="panel-copy">
+        <h3>${esc(a.name)}</h3>
+        <p class="panel-line">${esc(a.line)}</p>
+        ${ticks(a.points)}
       </div>
-    </div>
+      <figure class="win">
+        ${winBar}
+        ${img(a.key, t.alt[a.key])}
+        <a class="pan-hint" href="/img/${lang}-${a.key}.webp" target="_blank" rel="noopener">${esc(t.pan)}</a>
+      </figure>
+    </article>`).join('')}
+    <article class="panel" id="p-dark" role="tabpanel" style="--a:${AREA.dark[0]};--ai:${AREA.dark[1]}" aria-labelledby="tab-dark">
+      <div class="panel-copy">
+        <h3>${esc(t.dark.title)}</h3>
+        <p class="panel-line">${esc(t.dark.body)}</p>
+      </div>
+      <div class="compare win" data-compare dir="ltr" style="--pos:50%">
+        <img src="/img/fa-finance.webp" srcset="/img/fa-finance-760.webp 760w, /img/fa-finance.webp 1400w" sizes="(min-width: 1000px) 760px, 92vw" width="1400" height="900" alt="${esc(t.alt.light)}" loading="lazy" decoding="async">
+        <img class="cmp-dark" src="/img/fa-dark.webp" srcset="/img/fa-dark-760.webp 760w, /img/fa-dark.webp 1400w" sizes="(min-width: 1000px) 760px, 92vw" width="1400" height="900" alt="${esc(t.alt.dark)}" loading="lazy" decoding="async">
+        <span class="cmp-line" aria-hidden="true"><span class="cmp-knob"></span></span>
+        <span class="cmp-lbl cmp-lbl-l" aria-hidden="true">${esc(t.dark.light)}</span>
+        <span class="cmp-lbl cmp-lbl-d" aria-hidden="true">${esc(t.dark.darkL)}</span>
+        <input type="range" min="0" max="100" value="50" aria-label="${esc(t.dark.handle)}" data-cmp-range>
+      </div>
+    </article>
   </div>
 </section>
 
-<section class="daynight">
-  <div class="wrap dn-grid">
-    <div class="dn-copy">
-      <h2>${esc(t.dark.title)}</h2>
-      <p>${esc(t.dark.body)}</p>
-    </div>
-    <div class="compare win" data-compare dir="ltr" style="--pos:50%">
-      <img src="/img/fa-finance.webp" srcset="/img/fa-finance-760.webp 760w, /img/fa-finance.webp 1400w" sizes="(min-width: 1100px) 680px, 92vw" width="1400" height="900" alt="${esc(t.alt.light)}" loading="lazy" decoding="async">
-      <img class="cmp-dark" src="/img/fa-dark.webp" srcset="/img/fa-dark-760.webp 760w, /img/fa-dark.webp 1400w" sizes="(min-width: 1100px) 680px, 92vw" width="1400" height="900" alt="${esc(t.alt.dark)}" loading="lazy" decoding="async">
-      <span class="cmp-line" aria-hidden="true"><span class="cmp-knob"></span></span>
-      <span class="cmp-lbl cmp-lbl-l" aria-hidden="true">${esc(t.dark.light)}</span>
-      <span class="cmp-lbl cmp-lbl-d" aria-hidden="true">${esc(t.dark.darkL)}</span>
-      <input type="range" min="0" max="100" value="50" aria-label="${esc(t.dark.handle)}" data-cmp-range>
-    </div>
-  </div>
-</section>
-
-<section class="bill" id="bill">
+<section class="bill" id="bill" data-name="${esc(t.nav.bill)}">
   <div class="wrap bill-grid">
     <div class="bill-copy">
       <h2>${esc(t.bill.title)}</h2>
       <p>${esc(t.bill.body)}</p>
       ${ticks(t.bill.points)}
       <ul class="sizes" dir="ltr" aria-label="A4, A5, 80 mm">
-        <li><span class="sheet s-a4"></span>A4</li><li><span class="sheet s-a5"></span>A5</li><li><span class="sheet s-roll"></span>80 mm</li>
+        <li><span class="sz s-a4"></span>A4</li><li><span class="sz s-a5"></span>A5</li><li><span class="sz s-roll"></span>80 mm</li>
       </ul>
     </div>
-    <figure class="printer" data-reveal>
-      <div class="slot" aria-hidden="true">${icon('printer')}</div>
-      <div class="paper"><img src="/img/${lang}-bill.webp" width="1588" height="1100" alt="${esc(t.alt.bill)}" loading="lazy" decoding="async"></div>
+    <figure class="sheet plate" data-reveal>
+      <p class="bill-serial" dir="ltr" aria-hidden="true"><span>MZN</span><span>S717</span><span>${lang === 'en' ? '2026-11-07' : '1405/08/16'}</span><span>A4</span></p>
+      <div class="pan"><img src="/img/${lang}-bill.webp" width="1588" height="1232" alt="${esc(t.alt.bill)}" loading="lazy" decoding="async"></div>
+      <a class="pan-hint" href="/img/${lang}-bill.webp" target="_blank" rel="noopener">${esc(t.pan)}</a>
       <figcaption>${esc(t.bill.caption)}</figcaption>
     </figure>
   </div>
 </section>
 
-<section class="phone" id="phone">
-  <div class="wrap phone-grid">
-    <div class="handset" aria-hidden="true" data-handset>
-      <div class="hs-screen">
-        <div class="hs-top"><img src="/img/logo.svg" width="22" height="22" alt=""><span>${lang === 'en' ? 'Mizan' : 'میزان'}</span></div>
-        <div class="hs-scan" data-scan><span class="bars"></span></div>
-        <div class="hs-bill">
-          <ul data-lines>${PHONE_ITEMS.map(([name, code, price]) => `<li><span>${name}</span><b dir="ltr">${code} · ${price} ؋</b></li>`).join('')}</ul>
-          <p class="hs-total"><span>${esc(t.phone.total)}</span><b dir="ltr" data-total>${PHONE_TOTAL} ؋</b></p>
+<section class="counters" id="phone" data-name="${esc(t.nav.phone)}">
+  <div class="wrap">
+    <header class="sec-head"><h2>${esc(t.counters.title)}</h2></header>
+    <div class="ctr-grid">
+      <article class="ctr">
+        <div class="ctr-stage">
+          <div class="handset">
+            <img class="hs-shot" src="/img/${lang}-webphone.webp" width="520" height="933" alt="${esc(t.alt.webphone)}" loading="lazy" decoding="async">
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="phone-copy">
-      <h2>${esc(t.phone.title)}</h2>
-      <p>${esc(t.phone.body)}</p>
-      <dl class="pts">
-        ${t.phone.points.map(([h, b], i) => `<div>${icon(['barcode', 'shelf', 'drawer', 'low'][i])}<dt>${esc(h)}</dt><dd>${esc(b)}</dd></div>`).join('')}
-      </dl>
-      <p class="note">${esc(t.phone.note)}</p>
+        <h3>${esc(t.phone.title)}</h3>
+        <p>${esc(t.phone.body)}</p>
+        <dl class="pts">
+          ${t.phone.points.map(([h, b], i) => `<div>${icon(['barcode', 'shelf', 'drawer', 'low'][i])}<dt>${esc(h)}</dt><dd>${esc(b)}</dd></div>`).join('')}
+        </dl>
+        <p class="fine">${esc(t.phone.note)}</p>
+      </article>
+      <article class="ctr">
+        <div class="ctr-stage">
+          <figure class="win win-web">
+            <div class="win-bar" aria-hidden="true">${icon('lock', 'i i-sm')}<span dir="ltr">https://mizan.local</span></div>
+            <img src="/img/${lang}-webpc.webp" srcset="/img/${lang}-webpc-760.webp 760w, /img/${lang}-webpc.webp 1400w" sizes="(min-width: 960px) 520px, 92vw" width="1400" height="900" alt="${esc(t.alt.webpc)}" loading="lazy" decoding="async">
+            <figcaption class="web-cap">${esc(t.clients.caption)}</figcaption>
+          </figure>
+        </div>
+        <h3>${esc(t.clients.title)}</h3>
+        <p>${esc(t.clients.body)}</p>
+        <dl class="pts">
+          ${t.clients.points.map(([h, b], i) => `<div>${icon(['lock', 'backup'][i])}<dt>${esc(h)}</dt><dd>${esc(b)}</dd></div>`).join('')}
+          <div>${icon('users')}<dt>${esc(t.clients.rolesTitle)}</dt><dd>${t.clients.roles.map(([r]) => esc(r)).join(lang === 'en' ? ', ' : '، ')}</dd></div>
+        </dl>
+      </article>
     </div>
   </div>
 </section>
 
-<section class="trust">
+<section class="trust field">
   <div class="wrap">
-    <header class="sec-head sec-head-dark">
+    <header class="sec-head">
       <h2>${esc(t.trust.title)}</h2>
       <p>${esc(t.trust.sub)}</p>
     </header>
@@ -372,7 +342,7 @@ ${langs.filter(l => l !== lang).map(l => `<meta property="og:locale:alternate" c
       <ul class="trust-list">
         ${t.trust.items.map(([h, b], i) => `<li>${icon(['eye', 'users', 'lock', 'backup'][i])}<div><h3>${esc(h)}</h3><p>${esc(b)}</p></div></li>`).join('')}
       </ul>
-      <div class="never" data-reveal>
+      <div class="never plate" data-reveal>
         <h3>${esc(t.trust.neverTitle)}</h3>
         <ol>${t.trust.never.map(x => `<li>${icon('check')}<span>${esc(x)}</span></li>`).join('')}</ol>
       </div>
@@ -380,35 +350,30 @@ ${langs.filter(l => l !== lang).map(l => `<meta property="og:locale:alternate" c
   </div>
 </section>
 
-<section class="pk" id="packages">
+<section class="pk" id="packages" data-name="${esc(t.nav.packages)}">
   <div class="wrap">
     <header class="sec-head">
       <h2>${esc(t.pk.title)}</h2>
       <p>${esc(t.pk.sub)}</p>
     </header>
-    <div class="pk-grid" data-reveal>
+    <div class="pk-grid">
       ${t.pk.tiers.map((p, i) => `
-      <article class="tier tier-${p.key}">
-        <div class="weights" aria-hidden="true">${WEIGHT.slice(0, i + 1).join('')}</div>
+      <article class="tier plate tier-${p.key}">
+        <div class="seals" aria-hidden="true">${seal.repeat(i + 1)}</div>
         <h3>${esc(p.name)}</h3>
         ${ticks(p.lines)}
-        ${waBtn(t.contact.waPk.replace('{pk}', p.name), t.pk.ask, 'btn btn-line')}
+        ${waBtn(t.contact.waPk.replace('{pk}', p.name), t.pk.ask, i === 2 ? 'btn btn-go' : 'btn btn-line')}
       </article>`).join('')}
     </div>
-    <p class="note pk-note">${esc(t.pk.phones)}</p>
-  </div>
-</section>
-
-<section class="steps">
-  <div class="wrap">
-    <h2>${esc(t.steps.title)}</h2>
-    <ol class="step-list" data-reveal>
-      ${t.steps.items.map(([h, b], i) => `<li><span class="n">${digits(i + 1, lang)}</span><h3>${esc(h)}</h3><p>${esc(b)}</p></li>`).join('')}
+    <p class="fine pk-note">${esc(t.pk.phones)}</p>
+    <h3 class="steps-h">${esc(t.steps.title)}</h3>
+    <ol class="steps">
+      ${t.steps.items.map(([h, b], i) => `<li><span class="n" aria-hidden="true">${digits(i + 1, lang)}</span><h4>${esc(h)}</h4><p>${esc(b)}</p></li>`).join('')}
     </ol>
   </div>
 </section>
 
-<section class="faq" id="faq">
+<section class="faq" id="faq" data-name="${esc(t.nav.faq)}">
   <div class="wrap faq-grid">
     <h2>${esc(t.faq.title)}</h2>
     <div class="qa">
@@ -417,14 +382,15 @@ ${langs.filter(l => l !== lang).map(l => `<meta property="og:locale:alternate" c
   </div>
 </section>
 
-<section class="contact" id="contact">
+<section class="contact field" id="contact" data-name="${esc(t.nav.contact)}">
+  ${rosette('ros-contact')}
   <div class="wrap">
     <h2>${esc(t.contact.title)}</h2>
     <p class="contact-sub">${esc(t.contact.body)}</p>
     <ul class="contact-row">
-      <li><a class="cbox cbox-wa${L.ph.wa ? ' is-ph' : ''}" href="${L.wa(t.contact.waMsg)}"${L.ph.wa ? '' : ' target="_blank" rel="noopener"'}>${icon('wa')}<span><i>${esc(t.contact.wa)}</i><b dir="ltr">${esc(L.waText)}</b></span></a></li>
-      <li><a class="cbox${L.ph.tel ? ' is-ph' : ''}" href="${L.tel}">${icon('call')}<span><i>${esc(t.contact.call)}</i><b dir="ltr">${esc(L.telText)}</b></span></a></li>
-      <li><a class="cbox${L.ph.mail ? ' is-ph' : ''}" href="${L.mail}">${icon('mail')}<span><i>${esc(t.contact.email)}</i><b dir="ltr">${esc(L.mailText)}</b></span></a></li>
+      <li><a class="cbox cbox-wa" href="${L.wa(t.contact.waMsg)}"${L.ph.wa ? '' : ' target="_blank" rel="noopener"'}>${icon('wa')}<span><i>${esc(t.contact.wa)}</i><b dir="ltr">${esc(L.waText)}</b></span></a></li>
+      <li><a class="cbox" href="${L.tel}">${icon('call')}<span><i>${esc(t.contact.call)}</i><b dir="ltr">${esc(L.telText)}</b></span></a></li>
+      <li><a class="cbox" href="${L.mail}">${icon('mail')}<span><i>${esc(t.contact.email)}</i><b dir="ltr">${esc(L.mailText)}</b></span></a></li>
     </ul>
     <div class="social"><span>${esc(t.contact.social)}</span><ul>${socials}</ul></div>
   </div>
@@ -433,16 +399,16 @@ ${langs.filter(l => l !== lang).map(l => `<meta property="og:locale:alternate" c
 
 <footer class="foot">
   <div class="wrap foot-row">
-    <a class="brand brand-foot" href="${t.path}"><img src="/img/logo.svg" width="30" height="30" alt=""><span>${lang === 'en' ? 'Mizan' : 'میزان'}</span></a>
+    <a class="brand" href="${t.path}"><img src="/img/logo.svg" width="30" height="30" alt=""><span>${name}</span></a>
     <p>${esc(t.footer)}</p>
-    ${langSwitch('langs langs-foot')}
+    ${langSwitch('langs')}
     <p class="copy" dir="ltr">© ${new Date().getFullYear()} mzn.af</p>
   </div>
 </footer>
 
 <div class="mbar" data-mbar>
-  ${waBtn(t.contact.waMsg, t.navCta, 'btn btn-wa')}
-  <a class="btn btn-line${L.ph.tel ? ' is-ph' : ''}" href="${L.tel}">${icon('call')}<span>${esc(t.hero.call)}</span></a>
+  ${waBtn(t.contact.waMsg, t.navCta)}
+  <a class="btn btn-line" href="${L.tel}">${icon('call')}<span>${esc(t.hero.call)}</span></a>
 </div>
 <script src="/site.js?v=${ver}" defer></script>
 </body>
@@ -472,7 +438,7 @@ for (const l of langs) {
 // 404: Dari first with the other two beside it, since we cannot know who arrived.
 writeFileSync(join(out, '404.html'), stamp(`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>404 — میزان</title><meta name="robots" content="noindex"><link rel="icon" href="/img/logo.svg"><style>${css}</style></head>
 <body class="lang-fa"><main class="lost"><img src="/img/logo.svg" width="72" height="72" alt=""><h1>این صفحه پیدا نشد</h1><p lang="ps">دا پاڼه ونه موندل شوه · <span lang="en" dir="ltr">This page was not found</span></p>
-<p class="lost-links"><a class="btn btn-cream" href="/">میزان — دری</a><a class="btn btn-ghost" href="/ps/" lang="ps">پښتو</a><a class="btn btn-ghost" href="/en/" lang="en">English</a></p></main></body></html>`));
+<p class="lost-links"><a class="btn btn-go" href="/">میزان — دری</a><a class="btn btn-line" href="/ps/" lang="ps">پښتو</a><a class="btn btn-line" href="/en/" lang="en">English</a></p></main></body></html>`));
 
 writeFileSync(join(out, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${site}/sitemap.xml\n`);
 const today = new Date().toISOString().slice(0, 10);

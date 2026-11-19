@@ -12,7 +12,7 @@ export default {
     email: 'sales@mzn.af',      // e.g. 'info@mzn.af'
   },
 
-  // Full profile URLs. Empty ones still show their icon, marked "soon".
+  // Full profile URLs. An empty one is left off the page.
   social: {
     facebook: 'https://www.facebook.com/Mzn.af',
     instagram: 'https://www.instagram.com/mzn_af/',

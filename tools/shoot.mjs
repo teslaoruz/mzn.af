@@ -9,7 +9,7 @@ const [url, out, size, ...steps] = process.argv.slice(2);
 const [w, h] = size.split('x').map(Number);
 mkdirSync(out, { recursive: true });
 const port = 9300 + Math.floor(Math.random() * 500);
-const chrome = spawn('google-chrome-stable', ['--headless=new', '--no-sandbox', '--hide-scrollbars', `--remote-debugging-port=${port}`, `--window-size=${w},${h}`, '--user-data-dir=' + out + '/.prof', 'about:blank'], { stdio: 'ignore' });
+const chrome = spawn('google-chrome-stable', ['--headless=new', '--no-sandbox', '--hide-scrollbars', ...(process.env.SHOOT_INSECURE ? ['--ignore-certificate-errors'] : []), `--remote-debugging-port=${port}`, `--window-size=${w},${h}`, '--user-data-dir=' + out + '/.prof', 'about:blank'], { stdio: 'ignore' });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let ws;
 for (let i = 0; i < 50 && !ws; i++) { await sleep(200); try { const t = await (await fetch(`http://127.0.0.1:${port}/json`)).json(); const p = t.find(x => x.type === 'page'); if (p) ws = new WebSocket(p.webSocketDebuggerUrl); } catch {} }
@@ -29,6 +29,11 @@ for (const s of steps) {
   if (k === 'drag') {
     const [x1, y, x2] = v.split(',').map(Number), m = (type, x) => send('Input.dispatchMouseEvent', { type, x, y, button: 'left', buttons: type === 'mouseReleased' ? 0 : 1, clickCount: 1 });
     await m('mousePressed', x1); for (let i = 1; i <= 10; i++) await m('mouseMoved', x1 + (x2 - x1) * i / 10); await m('mouseReleased', x2);
+  }
+  if (k === 'full') {   // the whole page, top to bottom
+    const { width, height } = (await send('Page.getLayoutMetrics')).result.cssContentSize;
+    const r = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width, height, scale: 1 } });
+    writeFileSync(`${out}/${v}.png`, Buffer.from(r.result.data, 'base64'));
   }
   if (k === 'shot') { const r = await send('Page.captureScreenshot', { format: 'png' }); writeFileSync(`${out}/${v}.png`, Buffer.from(r.result.data, 'base64')); }
 }
